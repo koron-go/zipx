@@ -13,26 +13,32 @@ import (
 
 // ZipX is a zip archive extractor.
 type ZipX struct {
-	p int
+	c int
 	m Monitor
 }
 
 // New creates a extractor for zip archive.
 func New() *ZipX {
 	return &ZipX{
-		p: runtime.NumCPU(),
+		c: runtime.NumCPU(),
 		m: NullMonitor,
 	}
 }
 
-// Parallelism get current parallelism of extraction.
-func (x *ZipX) Parallelism() int {
-	return x.p
+// Concurrency get current concurrency of extraction.
+func (x *ZipX) Concurrency() int {
+	return x.c
 }
 
-// SetParallelism updates parallelism of extraction. 0 means no limitation.
-func (x *ZipX) SetParallelism(n int) {
-	x.p = n
+// SetConcurrency updates concurrency of extraction. 0 means no limitation.
+func (x *ZipX) SetConcurrency(n int) {
+	x.c = n
+}
+
+// WithConcurrency updates practical of extraction. 0 means no limitation.
+func (x *ZipX) WithConcurrency(n int) *ZipX {
+	x.SetConcurrency(n)
+	return x
 }
 
 // SetMonitor updates a monitor of progress.
@@ -41,6 +47,12 @@ func (x *ZipX) SetMonitor(m Monitor) {
 		m = NullMonitor
 	}
 	x.m = m
+}
+
+// WithMonitor updates a monitor of progress.
+func (x *ZipX) WithMonitor(m Monitor) *ZipX {
+	x.SetMonitor(m)
+	return x
 }
 
 // ExtractFile extracts a file as zip archive.
@@ -104,8 +116,8 @@ func (x *ZipX) exCtx(ctx context.Context, d Destination, total int) *exCtx {
 			NumTotal: total,
 		},
 	}
-	if x.p > 0 {
-		ex.sem = semaphore.NewWeighted(int64(x.p))
+	if x.c > 0 {
+		ex.sem = semaphore.NewWeighted(int64(x.c))
 	}
 	ex.inc()
 	return ex
