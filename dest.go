@@ -51,7 +51,7 @@ func (d dir) CreateFile(name string, info FileInfo) (io.Writer, error) {
 		return nil, err
 	}
 	return &file{
-		File: f,
+		File:  f,
 		mtime: info.Modified,
 	}, nil
 }
