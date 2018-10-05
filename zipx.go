@@ -3,8 +3,8 @@ package zipx
 import (
 	"archive/zip"
 	"context"
+	"fmt"
 	"io"
-	"io/ioutil"
 	"runtime"
 	"sync"
 
@@ -44,18 +44,18 @@ func (x *ZipX) SetMonitor(m Monitor) {
 }
 
 // ExtractFile extracts a file as zip archive.
-func (x *ZipX) ExtractFile(name string) error {
+func (x *ZipX) ExtractFile(ctx context.Context, name string, d Destination) error {
 	zr, err := zip.OpenReader(name)
 	if err != nil {
 		return err
 	}
 	defer zr.Close()
-	return x.Extract(nil, zr.Reader)
+	return x.Extract(ctx, zr.Reader, d)
 }
 
 // Extract extracts a zip archive with zip.Reader.
-func (x *ZipX) Extract(ctx context.Context, r zip.Reader) error {
-	ex := x.exCtx(ctx, len(r.File))
+func (x *ZipX) Extract(ctx context.Context, r zip.Reader, d Destination) error {
+	ex := x.exCtx(ctx, d, len(r.File))
 
 	for _, zf := range r.File {
 		err := ex.acquire()
@@ -63,27 +63,10 @@ func (x *ZipX) Extract(ctx context.Context, r zip.Reader) error {
 			return err
 		}
 		go func(zf *zip.File) {
-			defer ex.done()
-			if zf.Mode().IsDir() {
-				return
-			}
-			fr, err := zf.Open()
+			defer ex.release()
+			err := ex.extractOne(zf)
 			if err != nil {
-				// FIXME: record an error.
-				return
-			}
-			defer fr.Close()
-
-			// TODO:
-			var fw io.Writer = ioutil.Discard
-			if wc, ok := fw.(io.WriteCloser); ok {
-				defer wc.Close()
-			}
-
-			_, err = io.Copy(fw, fr)
-			if err != nil {
-				// FIXME: record an error.
-				return
+				// FIXME: record an error and terminate extractions.
 			}
 		}(zf)
 	}
@@ -95,16 +78,18 @@ func (x *ZipX) Extract(ctx context.Context, r zip.Reader) error {
 type exCtx struct {
 	x   *ZipX
 	ctx context.Context
+	d   Destination
 	p   Progress
 	wg  sync.WaitGroup
 	ml  sync.Mutex
 	sem *semaphore.Weighted
 }
 
-func (x *ZipX) exCtx(ctx context.Context, total int) *exCtx {
+func (x *ZipX) exCtx(ctx context.Context, d Destination, total int) *exCtx {
 	ex := &exCtx{
 		x:   x,
 		ctx: ctx,
+		d:   d,
 		p: Progress{
 			NumDone:  -1,
 			NumTotal: total,
@@ -113,6 +98,7 @@ func (x *ZipX) exCtx(ctx context.Context, total int) *exCtx {
 	if x.p > 0 {
 		ex.sem = semaphore.NewWeighted(int64(x.p))
 	}
+	ex.inc()
 	return ex
 }
 
@@ -135,7 +121,46 @@ func (ex *exCtx) acquire() error {
 	return nil
 }
 
-func (ex *exCtx) done() {
+func (ex *exCtx) extractOne(zf *zip.File) error {
+	m := zf.Mode()
+	if m.IsDir() {
+		err := ex.d.CreateDir(zf.Name)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	if m.IsRegular() {
+		fr, err := zf.Open()
+		if err != nil {
+			return err
+		}
+		defer fr.Close()
+
+		fw, err := ex.d.CreateFile(zf.Name, FileInfo{
+			NonUTF8:  zf.NonUTF8,
+			Size:     zf.UncompressedSize64,
+			Modified: zf.Modified,
+		})
+		if err != nil {
+			return err
+		}
+		if wc, ok := fw.(io.WriteCloser); ok {
+			defer wc.Close()
+		}
+
+		_, err = io.Copy(fw, fr)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return fmt.Errorf("unsupported file mode %s for %s", m, zf.Name)
+}
+
+func (ex *exCtx) release() {
 	ex.inc()
 	if ex.sem != nil {
 		ex.sem.Release(1)
