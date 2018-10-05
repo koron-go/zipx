@@ -56,22 +56,29 @@ func (x *ZipX) ExtractFile(ctx context.Context, name string, d Destination) erro
 // Extract extracts a zip archive with zip.Reader.
 func (x *ZipX) Extract(ctx context.Context, r zip.Reader, d Destination) error {
 	ex := x.exCtx(ctx, d, len(r.File))
-
 	for _, zf := range r.File {
 		err := ex.acquire()
 		if err != nil {
 			return err
 		}
+		if len(ex.errs) > 0 {
+			ex.release()
+			break
+		}
 		go func(zf *zip.File) {
 			defer ex.release()
 			err := ex.extractOne(zf)
 			if err != nil {
-				// FIXME: record an error and terminate extractions.
+				ex.ml.Lock()
+				ex.errs = append(ex.errs, err)
+				ex.ml.Unlock()
 			}
 		}(zf)
 	}
 	ex.wait()
-	// FIXME: check errors
+	if len(ex.errs) > 0 {
+		return ex.errs[0]
+	}
 	return nil
 }
 
@@ -79,10 +86,12 @@ type exCtx struct {
 	x   *ZipX
 	ctx context.Context
 	d   Destination
-	p   Progress
 	wg  sync.WaitGroup
 	ml  sync.Mutex
 	sem *semaphore.Weighted
+
+	p    Progress
+	errs []error
 }
 
 func (x *ZipX) exCtx(ctx context.Context, d Destination, total int) *exCtx {
