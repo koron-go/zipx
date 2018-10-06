@@ -14,7 +14,7 @@ type Monitor interface {
 	Monitor(Progress)
 }
 
-// MonitorFunc is a callback function for monitoring progress.
+// MonitorFunc is used to implement Monitor by function.
 type MonitorFunc func(Progress)
 
 // Monitor monitors progress of extraction.

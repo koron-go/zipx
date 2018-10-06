@@ -145,7 +145,7 @@ func (ex *exCtx) acquire() error {
 func (ex *exCtx) extractOne(zf *zip.File) error {
 	m := zf.Mode()
 	if m.IsDir() {
-		err := ex.d.CreateDir(zf.Name)
+		err := ex.d.CreateDir(zf.Name, DirInfo{NonUTF8: zf.NonUTF8})
 		if err != nil {
 			return err
 		}
