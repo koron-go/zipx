@@ -2,6 +2,7 @@ package zipx
 
 import (
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -71,4 +72,18 @@ func (f file) Close() error {
 		return err
 	}
 	return os.Chtimes(f.File.Name(), f.mtime, f.mtime)
+}
+
+var Discard Destination = &discard{}
+
+type discard struct{}
+
+func (*discard) CreateDir(name string) error {
+	// nothing to do.
+	return nil
+}
+
+func (*discard) CreateFile(name string, info FileInfo) (io.Writer, error) {
+	// nothing to do.
+	return ioutil.Discard, nil
 }
