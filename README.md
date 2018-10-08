@@ -71,6 +71,7 @@ See [GoDoc](https://godoc.org/github.com/koron-go/zipx) for references.
         than "UTF-8" easily by configuring `zip.DefaultReinterpreter`.
 
         ```go
+        // Example to support ShiftJIS (Windows or so)
         import "golang.org/x/text/encoding/japanese"
 
         func shiftjis(s string) (string, error) {
@@ -109,8 +110,8 @@ See [GoDoc](https://godoc.org/github.com/koron-go/zipx) for references.
 
 ## Why use `zipx` ?
 
-golang では' `archive/zip` 使えば容易に zip の解凍は実装できます。しかしファイ
-ル作ったり並列にして速度だしたりプログレスだしたりといったよくある実装は、自分
-でやらなきゃいけなくてちょっと面倒でした。
+golang では `archive/zip` 使えば容易にZIPの解凍は実装できます。しかしファイル
+作ったり並列にして速度だしたりプログレスだしたりといったよくある実装は、自分で
+やらなきゃいけなくてちょっと面倒でした。
 
-`zipx` は zip の解凍で頻繁に必要になるそれらをパッケージングしました。
+`zipx` ではZIPの解凍で頻繁に必要になるそれらの手続きをパッケージングしました。
