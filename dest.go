@@ -98,7 +98,7 @@ func (f file) Close() error {
 	return os.Chtimes(f.File.Name(), f.mtime, f.mtime)
 }
 
-// Discard is a destination which discard all extracted dirs and files.
+// Discard is a destination which discard all extracted files and dirs.
 var Discard Destination = &discard{}
 
 type discard struct{}
@@ -113,12 +113,12 @@ func (*discard) CreateFile(name string, info FileInfo) (io.Writer, error) {
 	return ioutil.Discard, nil
 }
 
-// Reinterpreter provides correct to encoding for name of files and dirs.
+// Reinterpreter provides correction of encoding of names for files and dirs.
 type Reinterpreter interface {
 	Reinterpret(string) (string, error)
 }
 
-// ReinterpretFunc is used to implement Reinterpreter by function.
+// ReinterpretFunc is used to implement Reinterpreter with function.
 type ReinterpretFunc func(string) (string, error)
 
 // Reinterpret re-interprets string with another encoding.
