@@ -32,6 +32,9 @@ type Destination interface {
 	CreateDir(name string, info DirInfo) error
 
 	// CreateFile creates a new file in destination.
+	//
+	// This can return io.WriteCloser as 1st return parameter, in that case
+	// zipx close it automatically after have finished to use.
 	CreateFile(name string, info FileInfo) (io.Writer, error)
 }
 

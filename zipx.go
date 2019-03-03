@@ -55,7 +55,7 @@ func (x *ZipX) WithMonitor(m Monitor) *ZipX {
 	return x
 }
 
-// ExtractFile extracts a file as zip archive.
+// ExtractFile extracts all files from a zip archive file "name".
 func (x *ZipX) ExtractFile(ctx context.Context, name string, d Destination) error {
 	zr, err := zip.OpenReader(name)
 	if err != nil {
@@ -65,7 +65,7 @@ func (x *ZipX) ExtractFile(ctx context.Context, name string, d Destination) erro
 	return x.Extract(ctx, zr.Reader, d)
 }
 
-// Extract extracts a zip archive with zip.Reader.
+// Extract extracts all files from zip.Reader as a zip archive.
 func (x *ZipX) Extract(ctx context.Context, r zip.Reader, d Destination) error {
 	ex := x.exCtx(ctx, d, len(r.File))
 	for _, zf := range r.File {
