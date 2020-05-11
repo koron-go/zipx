@@ -24,6 +24,9 @@ type FileInfo struct {
 
 	// Modified is last updated time of file.
 	Modified time.Time
+
+	// Mode is file mode.
+	Mode os.FileMode
 }
 
 // Destination provides destination for extraction.
@@ -71,7 +74,7 @@ func (d dir) CreateFile(name string, info FileInfo) (io.Writer, error) {
 	if err != nil {
 		return nil, err
 	}
-	f, err := os.Create(name)
+	f, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, info.Mode)
 	if err != nil {
 		return nil, err
 	}
