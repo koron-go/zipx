@@ -12,6 +12,9 @@ import (
 type DirInfo struct {
 	// NonUTF8 indicates name would be non UTF-8 encoding.
 	NonUTF8 bool
+
+	// Mode represents directory's mode and permission bits.
+	Mode os.FileMode
 }
 
 // FileInfo describes meta information of a file.
@@ -25,7 +28,7 @@ type FileInfo struct {
 	// Modified is last updated time of file.
 	Modified time.Time
 
-	// Mode is file mode.
+	// Mode represents file's mode and permission bits.
 	Mode os.FileMode
 }
 
@@ -57,7 +60,7 @@ func (d dir) CreateDir(name string, info DirInfo) error {
 		}
 		name = n
 	}
-	return os.MkdirAll(filepath.Join(string(d), name), 0777)
+	return os.MkdirAll(filepath.Join(string(d), name), info.Mode.Perm())
 }
 
 func (d dir) CreateFile(name string, info FileInfo) (io.Writer, error) {
@@ -74,7 +77,7 @@ func (d dir) CreateFile(name string, info FileInfo) (io.Writer, error) {
 	if err != nil {
 		return nil, err
 	}
-	f, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, info.Mode)
+	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, info.Mode)
 	if err != nil {
 		return nil, err
 	}
