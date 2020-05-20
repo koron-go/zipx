@@ -19,7 +19,15 @@ jobs:
       with:
         go-version: 1.x
 
-    - run: go test
+    - name: test (not Windows)
+      if: runner.os != 'Windows'
+      run: |
+        umask 000
+        go test
+
+    - name: test (only Windows)
+      if: runner.os == 'Windows'
+      run: go test
 
     - run: go build
 
