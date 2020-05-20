@@ -163,6 +163,7 @@ func (ex *exCtx) extractOne(zf *zip.File) error {
 			NonUTF8:  zf.NonUTF8,
 			Size:     zf.UncompressedSize64,
 			Modified: zf.Modified,
+			Mode:     m,
 		})
 		if err != nil {
 			return err
