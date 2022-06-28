@@ -79,7 +79,7 @@ func TestExtractWithMode(t *testing.T) {
 		t.Fatal(err)
 	}
 	act := &dummyDest{}
-	err = New().WithConcurrency(1).Extract(context.Background(), *zr, act)
+	err = New().WithConcurrency(1).Extract(context.Background(), zr, act)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -201,7 +201,7 @@ func TestExtract_CreateDir_failed(t *testing.T) {
 	}
 
 	errExp := &errDest{}
-	err = New().WithConcurrency(1).Extract(context.Background(), *zr, errExp)
+	err = New().WithConcurrency(1).Extract(context.Background(), zr, errExp)
 	if err == nil {
 		t.Fatal("unexpected success, must be failed")
 	}
@@ -240,7 +240,7 @@ func TestExtract_unsupported_mode(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = New().WithConcurrency(1).Extract(context.Background(), *zr, Discard)
+	err = New().WithConcurrency(1).Extract(context.Background(), zr, Discard)
 	if err == nil {
 		t.Fatal("unexpected success, must be failed")
 	}

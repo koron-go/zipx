@@ -62,11 +62,11 @@ func (x *ZipX) ExtractFile(ctx context.Context, name string, d Destination) erro
 		return err
 	}
 	defer zr.Close()
-	return x.Extract(ctx, zr.Reader, d)
+	return x.Extract(ctx, &zr.Reader, d)
 }
 
-// Extract extracts all files from zip.Reader as a zip archive.
-func (x *ZipX) Extract(ctx context.Context, r zip.Reader, d Destination) error {
+// Extract extracts all files from *zip.Reader as a zip archive.
+func (x *ZipX) Extract(ctx context.Context, r *zip.Reader, d Destination) error {
 	ex := x.exCtx(ctx, d, len(r.File))
 	for _, zf := range r.File {
 		err := ex.acquire()
