@@ -24,7 +24,7 @@ func main() {
 }
 ```
 
-See [GoDoc](https://godoc.org/github.com/koron-go/zipx) for references.
+See [document](https://pkg.go.dev/github.com/koron-go/zipx) for references.
 
 ## Features
 
