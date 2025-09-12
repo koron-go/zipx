@@ -3,7 +3,6 @@ package zipx
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -13,13 +12,7 @@ import (
 )
 
 func TestDir_CreateDir_Mode(t *testing.T) {
-	dir, err := ioutil.TempDir("", "CreateDir_Mode*")
-	if err != nil {
-		t.Fatalf("failed to TempDir: %s", err)
-	}
-	t.Cleanup(func() {
-		os.RemoveAll(dir)
-	})
+	dir := t.TempDir()
 	d := Dir(dir)
 
 	for _, tc := range []struct {
@@ -51,13 +44,7 @@ func TestDir_CreateDir_Mode(t *testing.T) {
 }
 
 func TestDir_CreateFile_Mode(t *testing.T) {
-	dir, err := ioutil.TempDir("", "CreateFile_Mode*")
-	if err != nil {
-		t.Fatalf("failed to TempDir: %s", err)
-	}
-	t.Cleanup(func() {
-		os.RemoveAll(dir)
-	})
+	dir := t.TempDir()
 	d := Dir(dir)
 
 	for _, tc := range []struct {
@@ -93,16 +80,10 @@ func TestDir_CreateFile_Mode(t *testing.T) {
 }
 
 func TestDir_NoUTF8(t *testing.T) {
-	dir, err := ioutil.TempDir("", "Dir_NoUTF8*")
-	if err != nil {
-		t.Fatalf("failed to TempDir: %s", err)
-	}
-	t.Cleanup(func() {
-		os.RemoveAll(dir)
-	})
+	dir := t.TempDir()
 	d := Dir(dir)
 
-	err = d.CreateDir("foo", DirInfo{NonUTF8: true, Mode: 0777})
+	err := d.CreateDir("foo", DirInfo{NonUTF8: true, Mode: 0777})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,19 +122,13 @@ func TestDiscard(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if w != ioutil.Discard {
-		t.Fatal("Discard.CreateFile returns not ioutil.Discard")
+	if w != io.Discard {
+		t.Fatal("Discard.CreateFile returns not io.Discard")
 	}
 }
 
 func TestDir_FileWrite(t *testing.T) {
-	dir, err := ioutil.TempDir("", "Dir_FileWrite*")
-	if err != nil {
-		t.Fatalf("failed to TempDir: %s", err)
-	}
-	t.Cleanup(func() {
-		os.RemoveAll(dir)
-	})
+	dir := t.TempDir()
 	d := Dir(dir)
 
 	const exp = "The quick brown fox jumps over the lazy dog"
@@ -167,7 +142,7 @@ func TestDir_FileWrite(t *testing.T) {
 		wc.Close()
 	}
 
-	b, err := ioutil.ReadFile(filepath.Join(dir, "foo.txt"))
+	b, err := os.ReadFile(filepath.Join(dir, "foo.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}

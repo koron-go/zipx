@@ -2,7 +2,6 @@ package zipx
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -116,7 +115,7 @@ func (*discard) CreateDir(name string, info DirInfo) error {
 
 func (*discard) CreateFile(name string, info FileInfo) (io.Writer, error) {
 	// nothing to do.
-	return ioutil.Discard, nil
+	return io.Discard, nil
 }
 
 // Reinterpreter provides correction of encoding of names for files and dirs.

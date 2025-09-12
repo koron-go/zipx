@@ -1,3 +1,4 @@
+// Package zipx provides fast extraction of zip archives.
 package zipx
 
 import (

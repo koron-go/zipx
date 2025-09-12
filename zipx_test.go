@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -134,20 +133,14 @@ func writeTestZipFile(t *testing.T, name string) {
 }
 
 func TestExtractFile(t *testing.T) {
-	dir, err := ioutil.TempDir("", "ExtractFile*")
-	if err != nil {
-		t.Fatalf("failed to TempDir: %s", err)
-	}
-	t.Cleanup(func() {
-		os.RemoveAll(dir)
-	})
+	dir := t.TempDir()
 
 	name := filepath.Join(dir, "test.zip")
 	writeTestZipFile(t, name)
 
 	outdir := filepath.Join(dir, "outdir")
 	var lastProgress Progress
-	err = New().WithConcurrency(1).
+	err := New().WithConcurrency(1).
 		WithMonitor(nil).
 		WithMonitor(MonitorFunc(func(p Progress) {
 			lastProgress = p
@@ -164,19 +157,13 @@ func TestExtractFile(t *testing.T) {
 }
 
 func TestExtract_CreateFile_failed(t *testing.T) {
-	dir, err := ioutil.TempDir("", "Extract_DestFailure*")
-	if err != nil {
-		t.Fatalf("failed to TempDir: %s", err)
-	}
-	t.Cleanup(func() {
-		os.RemoveAll(dir)
-	})
+	dir := t.TempDir()
 
 	name := filepath.Join(dir, "test.zip")
 	writeTestZipFile(t, name)
 
 	errExp := &errDest{}
-	err = New().WithConcurrency(1).ExtractFile(context.Background(), name, errExp)
+	err := New().WithConcurrency(1).ExtractFile(context.Background(), name, errExp)
 	if err == nil {
 		t.Fatal("unexpected success, must be failed")
 	}
