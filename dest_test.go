@@ -14,6 +14,7 @@ import (
 func TestDir_CreateDir_Mode(t *testing.T) {
 	dir := t.TempDir()
 	d := Dir(dir)
+	testUmask(t, 0)
 
 	for _, tc := range []struct {
 		name string
@@ -46,6 +47,7 @@ func TestDir_CreateDir_Mode(t *testing.T) {
 func TestDir_CreateFile_Mode(t *testing.T) {
 	dir := t.TempDir()
 	d := Dir(dir)
+	testUmask(t, 0)
 
 	for _, tc := range []struct {
 		name string
