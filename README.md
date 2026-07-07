@@ -2,7 +2,6 @@
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/koron-go/zipx)](https://pkg.go.dev/github.com/koron-go/zipx)
 [![Actions/Go](https://github.com/koron-go/zipx/workflows/Go/badge.svg)](https://github.com/koron-go/zipx/actions?query=workflow%3AGo)
-[![Go Report Card](https://goreportcard.com/badge/github.com/koron-go/zipx)](https://goreportcard.com/report/github.com/koron-go/zipx)
 
 Package to make **zip** e**x**traction easy (less codes) and efficient.
 
